@@ -17,7 +17,7 @@ struct Node // узел, который хранит состояние клет
     int x;
     int y;
     int g; // стомость от начала клетки
-    int f; // полная стоимость (g + h)
+    int f; // полная стоимость (g + h), где h - расстояние до конца
     Node* parent; // предыдущий узел
 };
 
@@ -69,11 +69,86 @@ Cell* AStarSearch(string* map, int height, int width, Cell start, Cell end)
     nodes[start.x][start.y].f = DistanceToCell(start.x, start.y, end.x, end.y);
     nodes[start.x][start.y].parent = NULL;
 
+    // Открытые списки 
     openX[openCount] = start.x;
     openY[openCount] = start.y;
     openF[openCount] = nodes[start.x][start.y].f;
     openG[openCount] = 0;
     openCount++;
+
+    //                влево, вправо, вниз, вверх
+    int directionsX[4] = {-1, 1, 0, 0}; // Направления, куда может идти x
+    int directionsY[4] = {0, 0, -1, 1}; // Направления, куда может идти x
+
+    bool endFound = false;
+    // Пока есть открытые узлы
+    while (openCount > 0)
+    {
+        int bestId = 0;
+        for (int i = 0; i < openCount; i++)
+        {
+            // Если текущий узел полной стоимости меньше лучшего узла полной стоимости ИЛИ текущий узел полной стоимости равен лучшему узлу полной стоимости И текущая стоимость от предыдущей клетки меньше лучше стоимости предыдущей клетки
+            if (openF[i] < openF[bestId] || (openF[i] == openF[bestId] && openG[i] < openG[bestId]))
+            {
+                bestId = i;
+            }
+        }
+
+        // Создаем переменные для работы с текущим узлом
+        int currentX = openX[bestId];
+        int currentY = openY[bestId];
+
+        // Перемещаем последний элемент на место лучшего, затем присваиваем ему значения
+        openCount--;
+        openX[bestId] = openX[openCount];
+        openY[bestId] = openY[openCount];
+        openF[bestId] = openF[openCount];
+        openG[bestId] = openG[openCount];
+
+        // Если узел уже закрыт, пропускаем условие, либо помечаем текущий узел, как закрытый
+        if (closed[currentX][currentY]) continue;
+        closed[currentX][currentY] = true;
+
+        // Если достигли целевого узла, отмечаем, что путь найден и выходим из цикла поиска
+        if (currentX == end.x && currentY == end.y)
+        {
+            endFound = true;
+            break;
+        }
+
+        // Для каждого соседа необходимо:                 
+        for (int i = 0; i < 4; i++)
+        {
+            // 1. вычислять координаты
+            int neighbourX = currentX + directionsX[i];
+            int neighbourY = currentY + directionsY[i];
+            // 2. проверять границы карты
+            if (neighbourX < 0 || neighbourX >= height || neighbourY < 0 || neighbourY >= width) continue;
+            // 3. проверять является ли сосед стеной
+            if (map[neighbourX][neighbourY] == '+') continue;
+            // 4. проверять закрыт ли сосед
+            if (closed[neighbourX][neighbourY]) continue;
+
+            int currentG = gcost[currentX][currentY] + 1;
+
+            // Если найдена меньшая стоимость к соседу
+            if (currentG < gcost[neighbourX][neighbourY])
+            {
+                // Обновляем значения у соседа
+                gcost[neighbourX][neighbourY] = currentG;
+                nodes[neighbourX][neighbourY].g = currentG;
+                nodes[neighbourX][neighbourY].f = currentG + DistanceToCell(neighbourX, neighbourY, end.x, end.y);
+                nodes[neighbourX][neighbourY].parent = nodes[currentX][currentY];
+
+                // Обновляем открытые списки
+                openX[openCount] = neighbourX;
+                openY[openCount] = neighbourY;
+                openF[openCount] = nodes[neighbourX][neighbourY].f;
+                openG[openCount] = nodes[neighbourX][neighbourY].g;
+                openCount++;
+            }
+        }
+    }
 }
 
 int main()
@@ -82,7 +157,6 @@ int main()
     SetConsoleCP(1251);
     SetConsoleOutputCP(1251);
 
-    cout << SHPINGALET << endl;
     string map[] =
     {
         // ALT+0183

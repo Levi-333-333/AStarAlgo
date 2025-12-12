@@ -2,7 +2,6 @@
 #include <Windows.h>
 #include <string>
 #include <cstdlib>
-#include "shpingalet.h"
 
 using namespace std;
 
@@ -36,7 +35,7 @@ Cell* AStarSearch(string* map, int height, int width, Cell start, Cell end)
     Node** nodes = new Node * [height];
 
     // Инициализация поля и значений узлов
-    for (int i = 0; i < width; i++)
+    for (int i = 0; i < height; i++)
     {
         // Выделяем строки
         closed[i] = new bool[width];
@@ -44,7 +43,7 @@ Cell* AStarSearch(string* map, int height, int width, Cell start, Cell end)
         nodes[i] = new Node[width];
 
         // Заполнение значений
-        for (int j = 0; j < height; j++)
+        for (int j = 0; j < width; j++)
         {
             closed[i][j] = false;
             gcost[i][j] = 1000000000;
@@ -138,7 +137,7 @@ Cell* AStarSearch(string* map, int height, int width, Cell start, Cell end)
                 gcost[neighbourX][neighbourY] = currentG;
                 nodes[neighbourX][neighbourY].g = currentG;
                 nodes[neighbourX][neighbourY].f = currentG + DistanceToCell(neighbourX, neighbourY, end.x, end.y);
-                nodes[neighbourX][neighbourY].parent = nodes[currentX][currentY];
+                nodes[neighbourX][neighbourY].parent = &nodes[currentX][currentY];
 
                 // Обновляем открытые списки
                 openX[openCount] = neighbourX;

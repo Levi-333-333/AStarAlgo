@@ -80,6 +80,7 @@ Cell* AStarSearch(string* map, int height, int width, Cell start, Cell end, int 
     int directionsY[4] = {0, 0, -1, 1}; // Направления, куда может идти x
 
     bool endFound = false;
+    Cell* path;
 
     // Пока есть открытые узлы
     while (openCount > 0)
@@ -150,7 +151,6 @@ Cell* AStarSearch(string* map, int height, int width, Cell start, Cell end, int 
         }
     }
 
-    Cell* path;
     //Если путь найден, восстанавливаем его по предыдущим узлам
     if (endFound)
     {

@@ -247,7 +247,7 @@ int main()
     end.y = 4;
 
     // Каждый цикл мы вызываем функцию AStarSearch, который возвращает набор клеток, по которым может передвигаться объект. После вызова этой функции переменная pathLenght задаётся длинной пути, которую надо пройти
-    while (start.x != end.y && start.y != end.y)
+    while (!(start.x == end.y && start.y == end.y))
     {
         int pathLength = 0;
         Cell* path = AStarSearch(map, height, width, start, end, pathLength);
@@ -265,6 +265,10 @@ int main()
             else
             {
                 start = end;
+                Cell* path = AStarSearch(map, height, width, start, end, pathLength);
+                PrintMap(map, height, width, path, start, end, pathLength);
+                cout << "Враг поймал вас" << endl;
+                // Инициализация боя
             }
 
             delete[] path;
@@ -274,5 +278,8 @@ int main()
             cout << "Не удалось построить пути к цели!\n";
             break;
         }
+
+        Sleep(300);
+        system("cls");
     }
 }

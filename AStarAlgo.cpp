@@ -246,14 +246,33 @@ int main()
     end.x = 4;
     end.y = 4;
 
-    int pathLength = 0;
-    Cell* path = AStarSearch(map, height, width, start, end, pathLength);
-
-    if (path != NULL)
+    // Каждый цикл мы вызываем функцию AStarSearch, который возвращает набор клеток, по которым может передвигаться объект. После вызова этой функции переменная pathLenght задаётся длинной пути, которую надо пройти
+    while (start.x != end.y && start.y != end.y)
     {
-        PrintMap(map, height, width, path, start, end, pathLength);
-        cout << path->x << " - " << path->y << endl;
-        delete[] path;
+        int pathLength = 0;
+        Cell* path = AStarSearch(map, height, width, start, end, pathLength);
+
+        if (path != NULL)
+        {
+            PrintMap(map, height, width, path, start, end, pathLength);
+
+            // Если длинна пути больше двух, объект перемещается на слежующий индекс набора клеток (то есть первый). 
+            if (pathLength >= 2)
+            {
+                start.x = path[1].x;
+                start.y = path[1].y;
+            }
+            else
+            {
+                start = end;
+            }
+
+            delete[] path;
+        }
+        else
+        {
+            cout << "Не удалось построить пути к цели!\n";
+            break;
+        }
     }
-    else cout << "Не удалось построить пути к цели!\n";
 }

@@ -159,7 +159,7 @@ Cell* AStarSearch(string* map, int height, int width, Cell start, Cell end, int 
         Node* currentNode = &nodes[end.x][end.y]; // Текущий узел на момент нахождения конца
 
         // Считаем путь 
-        int pathLenght = 0;
+        pathLenght = 0;
         while (currentNode != NULL)
         {
             currentNode = currentNode->parent;

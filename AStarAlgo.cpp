@@ -26,7 +26,7 @@ int DistanceToCell(int x1, int y1, int x2, int y2)
 }
 
 // A* алгоритм, который возвращает указатель на клетку, которую мы ищем
-Cell* AStarSearch(string* map, int height, int width, Cell start, Cell end, int &pathLenght)
+Cell* AStarSearch(string* map, int height, int width, Cell start, Cell end, int& pathLength)
 {
     // массив указателей на доступность узла
     bool** closed = new bool* [height]; // указываем строками на столбцы
@@ -76,12 +76,10 @@ Cell* AStarSearch(string* map, int height, int width, Cell start, Cell end, int 
     openCount++;
 
     //                влево, вправо, вниз, вверх
-    int directionsX[4] = {-1, 1, 0, 0}; // Направления, куда может идти x
-    int directionsY[4] = {0, 0, -1, 1}; // Направления, куда может идти x
+    int directionsX[4] = { -1, 1, 0, 0 }; // Направления, куда может идти x
+    int directionsY[4] = { 0, 0, -1, 1 }; // Направления, куда может идти x
 
     bool endFound = false;
-    Cell* path;
-
     // Пока есть открытые узлы
     while (openCount > 0)
     {
@@ -151,27 +149,24 @@ Cell* AStarSearch(string* map, int height, int width, Cell start, Cell end, int 
         }
     }
 
-    //Если путь найден, восстанавливаем его по предыдущим узлам
+    Cell* path = NULL;
+    // Если путь найден,восстанавливаем его по предыдущим узлам
     if (endFound)
     {
         cout << "Путь построен!" << endl;
-
-        Node* currentNode = &nodes[end.x][end.y]; // Текущий узел на момент нахождения конца
-
-        // Считаем путь 
-        pathLenght = 0;
+        Node* currentNode = &nodes[end.x][end.y]; // текущий узел на момент нахождения конца
+        pathLength = 0;
+        //Подсчитываем сколько узлов потребовалось для нахождения цели
         while (currentNode != NULL)
         {
+            pathLength++;
             currentNode = currentNode->parent;
-            pathLenght++;
         }
-
-        // Создаём массив клеток с размером пути
-        path = new Cell[pathLenght];
+        // Создаем массив клеток с размером пути
+        path = new Cell[pathLength];
         currentNode = &nodes[end.x][end.y];
-
-        // Построение массива клеток обратного порядка
-        for (int i = pathLenght - 1; i >= 0; i--)
+        // Строим массив клеток в обратном порядке
+        for (int i = pathLength - 1; i >= 0; i--)
         {
             path[i].x = currentNode->x;
             path[i].y = currentNode->y;
@@ -179,10 +174,10 @@ Cell* AStarSearch(string* map, int height, int width, Cell start, Cell end, int 
         }
     }
 
-    // Восвобождение памяти под конец
+    // Высвобождение памяти под 
     for (int i = 0; i < height; i++)
     {
-        // Поскольку мы работаем с массивом указателей на указатели, сперва необходимо очистить помять у строк, а затем и у самого массива
+        // поскольку мы работаем с массивом указателей на указатели, сперва необъодимо очистить память у строк, а затем и у самого массива
         delete[] closed[i];
         delete[] gcost[i];
         delete[] nodes[i];
@@ -190,27 +185,32 @@ Cell* AStarSearch(string* map, int height, int width, Cell start, Cell end, int 
     delete[] closed;
     delete[] gcost;
     delete[] nodes;
-
     delete[] openX;
     delete[] openY;
-    delete[] openG;
     delete[] openF;
+    delete[] openG;
 
     return path;
 }
 
-void PrintMap(string* map, int height, int width, Cell* path, Cell start, Cell end, int pathLenght)
+void PrintMap(string* map, int height, int width, Cell* path, Cell start, Cell end, int pathLength)
 {
     string* mapCopy = new string[height];
 
     for (int i = 0; i < height; i++) mapCopy[i] = map[i];
 
-    for (int i = 1; i + 1 < pathLenght; i++) mapCopy[path[i].x][path[i].y] = '*';
+    if (path != NULL)
+    {
+        for (int i = 1; i + 1 < pathLength; i++) mapCopy[path[i].x][path[i].y] = '*';
+    }
 
-    map[start.x][start.y] = 'S';
-    map[end.x][end.y] = 'F';
+    mapCopy[start.x][start.y] = 'S';
+    mapCopy[end.x][end.y] = 'G';
 
-    for (int i = 0; i < mapCopy->size(); i++) cout << mapCopy[i] << endl;
+    for (int i = 0; i < height; i++)
+    {
+        cout << mapCopy[i] << endl;
+    }
 
     delete[] mapCopy;
 }
@@ -226,11 +226,11 @@ int main()
         // · - пустая клетка
         // + - стена
         // * - путь
-        // S - начало
-        // F - финиш
+        // S - старт
+        // G - конец
         "···+·",
         "++·+·",
-        "·····",
+        "···+·",
         "·+++·",
         "·····"
     };
@@ -246,8 +246,10 @@ int main()
     end.x = 4;
     end.y = 4;
 
-    // Каждый цикл мы вызываем функцию AStarSearch, который возвращает набор клеток, по которым может передвигаться объект. После вызова этой функции переменная pathLenght задаётся длинной пути, которую надо пройти
-    while (!(start.x == end.y && start.y == end.y))
+    // Каждый цикл мы вызываем функцию AStarSearch, которая возвращает набор клеток, по которым может передвигаться объект. После вызова этой функции переменная pathLength задается длиной пути, которую надо пройти
+    // Пока координаты начальной точки НЕ равняются координатам конечной точки
+    // while (!(start.x == end.x && start.y == end.y))
+    while (!(start.x == end.x && start.y == end.y))
     {
         int pathLength = 0;
         Cell* path = AStarSearch(map, height, width, start, end, pathLength);
@@ -256,7 +258,7 @@ int main()
         {
             PrintMap(map, height, width, path, start, end, pathLength);
 
-            // Если длинна пути больше двух, объект перемещается на слежующий индекс набора клеток (то есть первый). 
+            // Если длина пути больше двух, объект перемещается на следующий индекс набор клеток (первый)
             if (pathLength >= 2)
             {
                 start.x = path[1].x;
@@ -265,11 +267,14 @@ int main()
             else
             {
                 start = end;
-                Cell* path = AStarSearch(map, height, width, start, end, pathLength);
-                PrintMap(map, height, width, path, start, end, pathLength);
-                cout << "Враг поймал вас" << endl;
-                // Инициализация боя
             }
+
+            char go;
+            do
+            {
+                cout << "Нажмите 'F' что бы продолжить : ";
+                cin >> go;
+            } while (go != 'F');
 
             delete[] path;
         }
@@ -281,5 +286,14 @@ int main()
 
         Sleep(300);
         system("cls");
+    }
+
+    if (start.x == end.x && start.y == end.y)
+    {
+        int pathLength = 0;
+        Cell* path = AStarSearch(map, height, width, start, end, pathLength);
+        PrintMap(map, height, width, path, start, end, pathLength);
+        cout << "Враг пимав вас!" << endl;
+        // ИНИЦИАЛИЗАЦИЯ БОЯ
     }
 }

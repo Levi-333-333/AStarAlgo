@@ -215,8 +215,9 @@ void PrintMap(string* map, int height, int width, Cell* path, Cell start, Cell e
     delete[] mapCopy;
 }
 
-int main()
+void main()
 {
+    // Требуется для вывода текста в адекватном виде
     setlocale(LC_ALL, "");
     SetConsoleCP(1251);
     SetConsoleOutputCP(1251);
